@@ -126,6 +126,10 @@ npm run build --workspace=@checklist/desktop
 Start the Vite local development server:
 ```bash
 npm run dev --workspace=@checklist/web
+# or
+npm run dev --workspace=packages/web
+# or
+npm run dev:web
 ```
 Open [http://localhost:3000](http://localhost:3000) in your web browser.
 
@@ -133,6 +137,10 @@ Open [http://localhost:3000](http://localhost:3000) in your web browser.
 Start the Electron desktop shell:
 ```bash
 npm start --workspace=@checklist/desktop
+# or
+npm start --workspace=packages/desktop
+# or
+npm run dev:desktop
 ```
 
 ---
