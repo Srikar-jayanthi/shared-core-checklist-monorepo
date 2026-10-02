@@ -1,0 +1,21 @@
+{
+  "name": "checklist-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build:core": "npm run build --workspace=@checklist/core",
+    "build:web": "npm run build --workspace=@checklist/web",
+    "build:desktop": "npm run build --workspace=@checklist/desktop",
+    "build": "npm run build:core && npm run build:web && npm run build:desktop",
+    "test:core": "npm run test --workspace=@checklist/core",
+    "test": "npm run test --workspace=@checklist/core",
+    "dev:web": "npm run dev --workspace=@checklist/web",
+    "dev:desktop": "npm run dev --workspace=@checklist/desktop"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

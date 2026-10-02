@@ -1,0 +1,19 @@
+{
+  "name": "@checklist/desktop",
+  "version": "1.0.0",
+  "description": "Desktop shell application powered by Electron and @checklist/core",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "electron .",
+    "dev": "tsc && electron ."
+  },
+  "dependencies": {
+    "@checklist/core": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "electron": "^30.0.9",
+    "typescript": "^5.4.5"
+  }
+}

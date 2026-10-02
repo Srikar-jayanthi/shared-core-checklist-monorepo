@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checklist Desktop Shell</title>
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text-main); padding: 2rem; display: flex; justify-content: center; }
+    .container { width: 100%; max-width: 600px; }
+    .header { text-align: center; margin-bottom: 2rem; }
+    .badge { display: inline-block; background: rgba(99, 102, 241, 0.2); color: #818cf8; border: 1px solid rgba(129, 140, 248, 0.3); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.75rem; }
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 1rem; padding: 1.5rem; }
+    .form { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .input { flex: 1; background: #0f172a; border: 1px solid var(--card-border); color: #fff; padding: 0.75rem 1rem; border-radius: 0.5rem; font-size: 1rem; outline: none; }
+    .btn-add { background: var(--primary); color: #fff; border: none; padding: 0.75rem 1.25rem; border-radius: 0.5rem; cursor: pointer; font-weight: 600; }
+    .filters { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; background: #0f172a; padding: 0.25rem; border-radius: 0.5rem; }
+    .filter-btn { flex: 1; padding: 0.5rem; background: transparent; color: var(--text-muted); border: none; border-radius: 0.375rem; cursor: pointer; }
+    .filter-btn.active { background: var(--card-bg); color: #fff; }
+    .task-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .task-item { display: flex; align-items: center; justify-content: space-between; padding: 0.875rem 1rem; background: #151f30; border: 1px solid var(--card-border); border-radius: 0.5rem; }
+    .task-item.completed span { text-decoration: line-through; color: var(--text-muted); }
+    .task-left { display: flex; align-items: center; gap: 0.75rem; }
+    .btn-del { background: transparent; color: #f87171; border: none; cursor: pointer; padding: 0.25rem 0.5rem; border-radius: 0.25rem; }
+    .btn-del:hover { background: rgba(239, 68, 68, 0.2); }
+    .footer { display: flex; justify-content: space-between; border-top: 1px solid var(--card-border); padding-top: 1rem; font-size: 0.85rem; color: var(--text-muted); }
+    .tag { background: rgba(56, 189, 248, 0.1); color: #38bdf8; padding: 0.2rem 0.5rem; border-radius: 0.25rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="badge">Desktop Native Shell</div>
+      <h1>Checklist Desktop</h1>
+      <p style="color: var(--text-muted); margin-top: 0.25rem;">Powered by shared core business logic</p>
+    </div>
+
+    <div class="card">
+      <form class="form" id="taskForm">
+        <input type="text" id="taskInput" class="input" placeholder="Add a desktop task..." required />
+        <button type="submit" class="btn-add">Add</button>
+      </form>
+
+      <div class="filters">
+        <button type="button" class="filter-btn active" id="fAll">All</button>
+        <button type="button" class="filter-btn" id="fActive">Active</button>
+        <button type="button" class="filter-btn" id="fCompleted">Completed</button>
+      </div>
+
+      <ul class="task-list" id="taskList"></ul>
+
+      <div class="footer">
+        <span id="itemCount">0 items remaining</span>
+        <span class="tag">Native File System (tasks.json)</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const api = window.desktopAPI;
+    const taskList = document.getElementById('taskList');
+    const taskInput = document.getElementById('taskInput');
+    const taskForm = document.getElementById('taskForm');
+    const itemCount = document.getElementById('itemCount');
+    const fAll = document.getElementById('fAll');
+    const fActive = document.getElementById('fActive');
+    const fCompleted = document.getElementById('fCompleted');
+
+    let currentFilter = 'ALL';
+
+    function renderTasks(tasks) {
+      taskList.innerHTML = '';
+      if (!tasks || tasks.length === 0) {
+        taskList.innerHTML = '<li style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No tasks</li>';
+      } else {
+        tasks.forEach(task => {
+          const li = document.createElement('li');
+          li.className = 'task-item' + (task.completed ? ' completed' : '');
+          li.innerHTML = `
+            <div class="task-left">
+              <input type="checkbox" ${task.completed ? 'checked' : ''} data-id="${task.id}" class="toggle-cb" />
+              <span>${task.title}</span>
+            </div>
+            <button class="btn-del" data-id="${task.id}">Delete</button>
+          `;
+          taskList.appendChild(li);
+        });
+      }
+
+      const activeCount = tasks.filter(t => !t.completed).length;
+      itemCount.innerText = `${activeCount} items remaining`;
+    }
+
+    async function refresh() {
+      if (api) {
+        const tasks = await api.getTasks();
+        renderTasks(tasks);
+      }
+    }
+
+    taskForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const val = taskInput.value.trim();
+      if (!val) return;
+      if (api) {
+        await api.addTask(val);
+        taskInput.value = '';
+        refresh();
+      }
+    });
+
+    taskList.addEventListener('click', async (e) => {
+      if (e.target.classList.contains('toggle-cb')) {
+        const id = e.target.getAttribute('data-id');
+        if (api && id) {
+          await api.toggleTask(id);
+          refresh();
+        }
+      } else if (e.target.classList.contains('btn-del')) {
+        const id = e.target.getAttribute('data-id');
+        if (api && id) {
+          await api.deleteTask(id);
+          refresh();
+        }
+      }
+    });
+
+    function setFilterBtn(filter) {
+      currentFilter = filter;
+      fAll.classList.toggle('active', filter === 'ALL');
+      fActive.classList.toggle('active', filter === 'ACTIVE');
+      fCompleted.classList.toggle('active', filter === 'COMPLETED');
+      if (api) {
+        api.setFilter(filter).then(refresh);
+      }
+    }
+
+    fAll.addEventListener('click', () => setFilterBtn('ALL'));
+    fActive.addEventListener('click', () => setFilterBtn('ACTIVE'));
+    fCompleted.addEventListener('click', () => setFilterBtn('COMPLETED'));
+
+    if (api) {
+      api.onStoreChanged(({ tasks, filter }) => {
+        currentFilter = filter;
+        fAll.classList.toggle('active', filter === 'ALL');
+        fActive.classList.toggle('active', filter === 'ACTIVE');
+        fCompleted.classList.toggle('active', filter === 'COMPLETED');
+        renderTasks(tasks);
+      });
+      refresh();
+    }
+  </script>
+</body>
+</html>
