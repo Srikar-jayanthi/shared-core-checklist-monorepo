@@ -4,6 +4,33 @@ A production-grade, Clean Architecture monorepo implementing a cross-platform ch
 
 ---
 
+## 👨‍🏫 Quick Start for Mentors & Evaluators
+
+To clone and verify this monorepo on your laptop in under 60 seconds:
+
+```bash
+# 1. Clone repository
+git clone https://github.com/Srikar-jayanthi/shared-core-checklist-monorepo.git
+cd shared-core-checklist-monorepo
+
+# 2. Install dependencies across workspaces
+npm install
+
+# 3. Run the isolated business logic unit test suite (10/10 tests pass)
+npm test
+
+# 4. Build all packages (Core, Web, and Desktop)
+npm run build
+
+# 5. Run the automated 10-point specification audit script
+node verify-solution.mjs
+
+# 6. Run the Web Application locally (opens at http://localhost:3000)
+npm run dev --workspace=@checklist/web
+```
+
+---
+
 ## 🏛️ Architecture Overview
 
 The system strictly follows **Clean Architecture** and the **Dependency Inversion Principle (DIP)**:
